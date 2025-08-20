@@ -8,177 +8,177 @@ import {
 
 // Simulated Server API
 const ServerAPI = {
-    // Simulated server data storage (In a real app, this would be on the server)
-    _data: {
-        titles: [],
-        globalReferences: []
-    },
-    
-    // Get data from server
-    async getTitles() {
-        // Simulate network delay
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve([...this._data.titles]);
-            }, 300);
-        });
-    },
-    
-    async getGlobalReferences() {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve([...this._data.globalReferences]);
-            }, 300);
-        });
-    },
-    
-    // Save data to server
-    async saveTitles(titles) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                this._data.titles = [...titles];
-                resolve({ success: true });
-            }, 300);
-        });
-    },
-    
-    async saveGlobalReferences(references) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                this._data.globalReferences = [...references];
-                resolve({ success: true });
-            }, 300);
-        });
-    },
-    
-    // Get a specific title by id
-    async getTitleById(id) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const title = this._data.titles.find(t => t.id === id);
-                resolve(title || null);
-            }, 200);
-        });
-    },
-    
-    // Generate thumbnails (simulate AI processing)
-    async generateThumbnails(titleObj, references, quantity, startIndex = 0) {
-        // First generate all concepts sequentially
-        const concepts = [];
-        
-        return new Promise(resolve => {
-            // Generate concepts sequentially first - this is the first AI's job
-            const generateConcepts = async () => {
-                for (let i = 0; i < quantity; i++) {
-                    // Simulate concept generation for each thumbnail
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    const concept = {
-                        id: generateID(),
-                        index: startIndex + i,
-                        title: titleObj.title,
-                        instructions: titleObj.instructions,
-                        summary: generatePromptSummary(titleObj.title, titleObj.instructions),
-                        fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, startIndex + i)
-                    };
-                    
-                    concepts.push(concept);
-                }
-                
-                // After all concepts are generated, start parallel image generation
-                processThumbnailsInParallel(concepts, references);
-            };
-            
-            // Process thumbnails in parallel, 5 at a time
-            const processThumbnailsInParallel = async (concepts, references) => {
-                const thumbnails = [];
-                const maxConcurrent = 5;
-                let completedCount = 0;
-                let activeCount = 0;
-                let nextIndex = 0;
-                
-                // Function to process a single thumbnail
-                const processThumbnail = async (concept) => {
-                    activeCount++;
-                    
-                    // Simulate varying processing times (1-3 seconds)
-                    const processingTime = 1000 + Math.random() * 2000;
-                    await new Promise(resolve => setTimeout(resolve, processingTime));
-                    
-                    const thumbnailData = {
-                        id: concept.id,
-                        image_url: `https://placehold.co/600x400/3498db/ffffff?text=Thumbnail+${concept.index + 1}`,
-                        summary: concept.summary,
-                        promptDetails: {
-                            summary: concept.summary,
-                            title: concept.title,
-                            instructions: concept.instructions || 'No custom instructions provided',
-                            referenceCount: references.length,
-                            referenceImages: references.map(ref => ref.data),
-                            fullPrompt: concept.fullPrompt
-                        },
-                        status: 'completed',
-                        index: concept.index
-                    };
-                    
-                    thumbnails.push(thumbnailData);
-                    completedCount++;
-                    activeCount--;
-                    
-                    // Signal that this thumbnail is ready
-                    if (thumbnailReady) {
-                        thumbnailReady(thumbnailData);
-                    }
-                    
-                    // Start another one if there are more to process
-                    if (nextIndex < concepts.length) {
-                        processThumbnail(concepts[nextIndex++]);
-                    }
-                    
-                    // If all thumbnails are complete, resolve the main promise
-                    if (completedCount === concepts.length) {
-                        // Sort thumbnails by original index
-                        thumbnails.sort((a, b) => a.index - b.index);
-                        resolve(thumbnails);
-                    }
-                };
-                
-                // Start initial batch of thumbnails
-                const initialBatch = Math.min(maxConcurrent, concepts.length);
-                for (let i = 0; i < initialBatch; i++) {
-                    processThumbnail(concepts[nextIndex++]);
-                }
-            };
-            
-            // Start the process
-            generateConcepts();
-        });
-    },
-    
-    // Regenerate a single thumbnail
-    async regenerateThumbnail(titleObj, references, index) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const summaryText = generatePromptSummary(titleObj.title, titleObj.instructions);
-                
-                const thumbnailData = {
-                    id: generateID(),
-                    image_url: `https://placehold.co/600x400/e74c3c/ffffff?text=Regenerated+${index+1}`,
-                    summary: `Regenerated concept ${index+1} for "${titleObj.title}"`,
-                    promptDetails: {
-                        summary: summaryText,
-                        title: titleObj.title,
-                        instructions: titleObj.instructions || 'No custom instructions provided',
-                        referenceCount: references.length,
-                        referenceImages: references.map(ref => ref.data),
-                        fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, index)
-                    }
-                };
-                
-                resolve(thumbnailData);
-            }, 2000);
-        });
-    }
+	// Simulated server data storage (In a real app, this would be on the server)
+	_data: {
+		titles: [],
+		globalReferences: []
+	},
+	
+	// Get data from server
+	async getTitles() {
+		// Simulate network delay
+		return new Promise(resolve => {
+			setTimeout(() => {
+				resolve([...this._data.titles]);
+			}, 300);
+		});
+	},
+	
+	async getGlobalReferences() {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				resolve([...this._data.globalReferences]);
+			}, 300);
+		});
+	},
+	
+	// Save data to server
+	async saveTitles(titles) {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				this._data.titles = [...titles];
+				resolve({ success: true });
+			}, 300);
+		});
+	},
+	
+	async saveGlobalReferences(references) {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				this._data.globalReferences = [...references];
+				resolve({ success: true });
+			}, 300);
+		});
+	},
+	
+	// Get a specific title by id
+	async getTitleById(id) {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				const title = this._data.titles.find(t => t.id === id);
+				resolve(title || null);
+			}, 200);
+		});
+	},
+	
+	// Generate thumbnails (simulate AI processing)
+	async generateThumbnails(titleObj, references, quantity, startIndex = 0) {
+		// First generate all concepts sequentially
+		const concepts = [];
+		
+		return new Promise(resolve => {
+			// Generate concepts sequentially first - this is the first AI's job
+			const generateConcepts = async () => {
+				for (let i = 0; i < quantity; i++) {
+					// Simulate concept generation for each thumbnail
+					await new Promise(resolve => setTimeout(resolve, 500));
+					
+					const concept = {
+						id: generateID(),
+						index: startIndex + i,
+						title: titleObj.title,
+						instructions: titleObj.instructions,
+						summary: generatePromptSummary(titleObj.title, titleObj.instructions),
+						fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, startIndex + i)
+					};
+					
+					concepts.push(concept);
+				}
+				
+				// After all concepts are generated, start parallel image generation
+				processThumbnailsInParallel(concepts, references);
+			};
+			
+			// Process thumbnails in parallel, 5 at a time
+			const processThumbnailsInParallel = async (concepts, references) => {
+				const thumbnails = [];
+				const maxConcurrent = 5;
+				let completedCount = 0;
+				let activeCount = 0;
+				let nextIndex = 0;
+				
+				// Function to process a single thumbnail
+				const processThumbnail = async (concept) => {
+					activeCount++;
+					
+					// Simulate varying processing times (1-3 seconds)
+					const processingTime = 1000 + Math.random() * 2000;
+					await new Promise(resolve => setTimeout(resolve, processingTime));
+					
+					const thumbnailData = {
+						id: concept.id,
+						image_url: `https://placehold.co/600x400/3498db/ffffff?text=Thumbnail+${concept.index + 1}`,
+						summary: concept.summary,
+						promptDetails: {
+							summary: concept.summary,
+							title: concept.title,
+							instructions: concept.instructions || 'No custom instructions provided',
+							referenceCount: references.length,
+							referenceImages: references.map(ref => ref.data),
+							fullPrompt: concept.fullPrompt
+						},
+						status: 'completed',
+						index: concept.index
+					};
+					
+					thumbnails.push(thumbnailData);
+					completedCount++;
+					activeCount--;
+					
+					// Signal that this thumbnail is ready
+					if (thumbnailReady) {
+						thumbnailReady(thumbnailData);
+					}
+					
+					// Start another one if there are more to process
+					if (nextIndex < concepts.length) {
+						processThumbnail(concepts[nextIndex++]);
+					}
+					
+					// If all thumbnails are complete, resolve the main promise
+					if (completedCount === concepts.length) {
+						// Sort thumbnails by original index
+						thumbnails.sort((a, b) => a.index - b.index);
+						resolve(thumbnails);
+					}
+				};
+				
+				// Start initial batch of thumbnails
+				const initialBatch = Math.min(maxConcurrent, concepts.length);
+				for (let i = 0; i < initialBatch; i++) {
+					processThumbnail(concepts[nextIndex++]);
+				}
+			};
+			
+			// Start the process
+			generateConcepts();
+		});
+	},
+	
+	// Regenerate a single thumbnail
+	async regenerateThumbnail(titleObj, references, index) {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				const summaryText = generatePromptSummary(titleObj.title, titleObj.instructions);
+				
+				const thumbnailData = {
+					id: generateID(),
+					image_url: `https://placehold.co/600x400/e74c3c/ffffff?text=Regenerated+${index+1}`,
+					summary: `Regenerated concept ${index+1} for "${titleObj.title}"`,
+					promptDetails: {
+						summary: summaryText,
+						title: titleObj.title,
+						instructions: titleObj.instructions || 'No custom instructions provided',
+						referenceCount: references.length,
+						referenceImages: references.map(ref => ref.data),
+						fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, index)
+					}
+				};
+				
+				resolve(thumbnailData);
+			}, 2000);
+		});
+	}
 };
 
 // Data Storage (will now communicate with the backend)
@@ -188,6 +188,9 @@ let currentTitle = null;
 let currentReferenceDataMap = {}; // New: To store reference image data for the current view
 let isLoading = true;
 let currentUser = null;
+let sseSource = null;
+let currentBatchStartIndex = null;
+const ideaToIndexMap = new Map();
 
 // DOM Elements
 const titleList = document.getElementById('title-list');
@@ -314,14 +317,12 @@ async function loadUserData() {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('app-container').style.display = 'flex';
 
-        // If titles are loaded, start polling for the first one for demonstration
+        // If titles are loaded, auto-load the most recent and connect SSE
         if (titles && titles.length > 0) {
-            const firstTitleId = titles[0].id;
-            const defaultQuantity = 5;
-            console.log(`LUD: Automatically starting polling for title ID: ${firstTitleId}, quantity: ${defaultQuantity}`);
-            pollThumbnailStatus(firstTitleId, defaultQuantity);
+            console.log('LUD: Auto-loading first title and connecting SSE');
+            await loadTitle(titles[0]);
         } else {
-            console.log('LUD: No titles found, not starting auto-polling.');
+            console.log('LUD: No titles found, not starting auto-load.');
         }
         console.log('LUD: User data loading complete.');
     } catch (error) {
@@ -430,6 +431,27 @@ function setupEventListeners() {
             const instructions = customInstructions.value.trim();
             const quantity = parseInt(quantitySelect.value) || 5;
             
+            // Immediately show placeholders/progress so the user sees activity
+            progressSection.style.display = 'block';
+            thumbnailsEmptyState.style.display = 'none';
+            const startIndexEarly = thumbnailsGrid.querySelectorAll('.thumbnail-item').length;
+            currentBatchStartIndex = startIndexEarly;
+            currentBatchExpected = quantity;
+            for (let i = 0; i < quantity; i++) {
+                const index = startIndexEarly + i;
+                const thumbContainer = document.createElement('div');
+                thumbContainer.className = 'thumbnail-item';
+                thumbContainer.id = `thumb-${index}`;
+                const loadingThumb = document.createElement('div');
+                loadingThumb.className = 'loading-thumbnail';
+                const stage = document.createElement('div');
+                stage.className = 'thumbnail-status';
+                stage.textContent = 'Creating prompt...';
+                loadingThumb.appendChild(stage);
+                thumbContainer.appendChild(loadingThumb);
+                thumbnailsGrid.appendChild(thumbContainer);
+            }
+            
             console.log("Creating/updating title:", { title, instructions });
             
             // Check if this is a new title or existing one
@@ -457,14 +479,19 @@ function setupEventListeners() {
                     }
                 }
             }
+
+            showLoading(false);
+
             
             // Generate thumbnails
             console.log("Generating thumbnails for title ID:", currentTitle.id, "Quantity:", quantity);
+            // Connect SSE before triggering generation to catch early 'pending' events
+            connectSSE(currentTitle.id);
             const generateResponse = await generatePaintings(currentTitle.id, quantity);
             console.log("Generate thumbnails response:", generateResponse.data);
             
-            // Start polling for thumbnail status instead of loading immediately
-            pollThumbnailStatus(currentTitle.id, quantity);
+            // Live updates via SSE (fallback polling continues)
+            // connectSSE(currentTitle.id);
 
             // Refresh titles list after starting generation/polling
             console.log("Refreshing titles list");
@@ -972,6 +999,18 @@ function renderThumbnail(thumbnailData, index) {
         return;
     }
     
+    // Show progress stages for pending/processing
+    if (thumbnailData.status === 'pending' || thumbnailData.status === 'processing' || !thumbnailData.image_url) {
+        const loadingThumb = document.createElement('div');
+        loadingThumb.className = 'loading-thumbnail';
+        const stage = document.createElement('div');
+        stage.className = 'thumbnail-status';
+        stage.textContent = thumbnailData.status === 'pending' ? 'Creating prompt...' : 'Creating image...';
+        loadingThumb.appendChild(stage);
+        thumbContainer.appendChild(loadingThumb);
+        return;
+    }
+    
     // Regular thumbnail rendering for successful thumbnails
     const img = document.createElement('img');
     img.src = thumbnailData.image_url;
@@ -1217,6 +1256,19 @@ async function loadTitle(titleItem) {
         
         // Show more thumbnails button if thumbnails exist
         moreThumbnailsSection.style.display = currentTitle.thumbnails && currentTitle.thumbnails.length > 0 ? 'block' : 'none';
+
+        // Start SSE for live updates on this title
+        connectSSE(currentTitle.id);
+
+        // If any painting is pending/processing, we can optionally show progress UI
+        if (currentTitle.thumbnails && currentTitle.thumbnails.some(t => t.status === 'pending' || t.status === 'processing')) {
+            progressSection.style.display = 'block';
+            const total = currentTitle.thumbnails.length;
+            ai1Status.textContent = 'Thumbnail ideas generated.';
+            ai1Progress.style.width = '100%';
+            ai2Status.textContent = `Generating images...`;
+            ai2Progress.style.width = '0%';
+        }
     } catch (error) {
         console.error('Error loading title:', error);
         alert(`Failed to load title data: ${error.message}. Please try again.`);
@@ -1333,100 +1385,140 @@ async function loadThumbnails(titleId) {
 }
 
 // Poll for thumbnail generation status
-async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0) {
-    console.log(`[Poll #${attempt + 1}] Entered pollThumbnailStatus for title ${titleId}`);
-    const maxAttempts = 40; // Poll for up to 2 minutes (40 * 3s)
-    const pollInterval = 3000; // Poll every 3 seconds
+// async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0) {
+//     console.log(`[Poll #${attempt + 1}] Entered pollThumbnailStatus for title ${titleId}`);
+//     const maxAttempts = 40; // Poll for up to 2 minutes (40 * 3s)
+//     const pollInterval = 3000; // Poll every 3 seconds
 
-    if (attempt >= maxAttempts) {
-        console.error(`[Poll #${attempt + 1}] Polling timed out.`);
-        alert('Thumbnail generation is taking longer than expected. Please check back later.');
-        showLoading(false);
-        // Optionally load whatever is available
-        await loadThumbnails(titleId); 
-        return;
-    }
+//     if (attempt >= maxAttempts) {
+//         console.error(`[Poll #${attempt + 1}] Polling timed out.`);
+//         alert('Thumbnail generation is taking longer than expected. Please check back later.');
+//         showLoading(false);
+//         // Optionally load whatever is available
+//         await loadThumbnails(titleId); 
+//         return;
+//     }
 
-    try {
-        console.log(`[Poll #${attempt + 1}] Before API call to getPaintings`);
-        const startTime = Date.now();
-        // Log the API call details before making it
-        console.log(`[Poll #${attempt + 1}] Making API call to endpoint: /paintings/${titleId}`);
-        
-        const response = await getPaintings(titleId);
-        
-        console.log(`[Poll #${attempt + 1}] API call completed in ${Date.now() - startTime}ms`);
-        // Use the paintings array instead of thumbnails
-        const thumbnails = response.data.paintings || [];
-        console.log(`[Poll #${attempt + 1}] Fetched thumbnails:`, thumbnails);
+//     try {
+//         const response = await getPaintings(titleId);
+//         const thumbnails = response.data.paintings || [];
+//         // Sort by created_at ascending so newest are at the end
+//         const sortedAsc = [...thumbnails].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+//         // Take only the latest expectedQuantity as the current batch
+//         const batch = sortedAsc.slice(-expectedQuantity);
 
-        // Filter only the thumbnails belonging to the current generation batch/title
-        // Assuming they are added sequentially and sorted ASC by creation time
-        const relevantThumbnails = thumbnails.filter(t => t.title_id === titleId); 
+//         const baseIndex = currentBatchStartIndex != null ? currentBatchStartIndex : (thumbnailsGrid.querySelectorAll('.thumbnail-item').length - expectedQuantity);
+//         let completedCount = 0;
+//         batch.forEach((thumbnail, idx) => {
+//             const index = baseIndex + idx;
+//             const containerExists = document.getElementById(`thumb-${index}`);
+//             if (containerExists) {
+//                 // Cache mapping as well for SSE consistency
+//                 if (thumbnail.idea_id != null) {
+//                     ideaToIndexMap.set(thumbnail.idea_id, index);
+//                 }
+//                 renderThumbnail(thumbnail, index);
+//             }
+//             if (thumbnail.status === 'completed' || thumbnail.status === 'failed') completedCount++;
+//         });
 
-        let completedCount = 0;
-        let processingCount = 0;
-        let pendingCount = 0;
+//         if (completedCount === batch.length && batch.length >= expectedQuantity) {
+//             progressSection.style.display = 'none';
+//             moreThumbnailsSection.style.display = 'block';
+//             showLoading(false);
+//             // Clear batch indexing after completion
+//             currentBatchStartIndex = null;
+//             currentBatchExpected = 0;
+//         } else {
+//             setTimeout(() => pollThumbnailStatus(titleId, expectedQuantity, attempt + 1), pollInterval);
+//         }
+//     } catch (error) {
+//         console.error(`[Poll #${attempt + 1}] Error during polling:`, error);
+//         setTimeout(() => pollThumbnailStatus(titleId, expectedQuantity, attempt + 1), pollInterval);
+//     }
+// }
 
-        // Render each thumbnail with its current status
-        // We need to determine the correct index for rendering.
-        // If loadTitle fetches initial thumbnails, we might need to map by ID or rely on the ASC order.
-        // Assuming the index corresponds to the position in the ASC sorted list for this title.
-        relevantThumbnails.forEach((thumbnail, index) => {
-            // Ensure the container exists (it should have been created by generateServerThumbnails)
-            const containerExists = document.getElementById(`thumb-${index}`);
-            if (containerExists) {
-                 renderThumbnail(thumbnail, index);
-            }
+function connectSSE(titleId) {
+	if (!titleId) return;
+	if (sseSource) {
+		try { sseSource.close(); } catch (e) {}
+		sseSource = null;
+	}
+	const token = localStorage.getItem('token');
+	// Use relative path; browser will include cookies/headers only for same-origin. For SSE auth, we will pass token via header is not supported; fallback to query param.
+	const streamUrl = `/api/paintings/${titleId}/stream`;
+	// EventSource cannot set headers, so we append token in query only if needed.
+	const urlWithToken = `${streamUrl}?token=${encodeURIComponent(token || '')}`; // backend uses auth middleware which reads header; adjust to header-less by intercepting fetch.
+	// Use a polyfill via native EventSource; we'll rely on server-side auth middleware since we cannot set header here. If it rejects, polling will continue.
+	try {
+		sseSource = new EventSource(urlWithToken);
+	} catch (e) {
+		console.warn('SSE not supported or failed to connect, falling back to polling.');
+		return;
+	}
+	
+	sseSource.addEventListener('init', () => {
+		console.log('SSE connected');
+	});
+	
+	sseSource.addEventListener('painting', async (event) => {
+		try {
+			const data = JSON.parse(event.data);
+			// Update currentTitle.thumbnails entry by paintingId/ideaId or add placeholder
+			if (!currentTitle || currentTitle.id !== titleId) return;
+			if (!currentTitle.thumbnails) currentTitle.thumbnails = [];
 
-            if (thumbnail.status === 'completed' || thumbnail.status === 'failed') {
-                completedCount++;
-            } else if (thumbnail.status === 'processing') {
-                processingCount++;
-            } else {
-                pendingCount++;
-            }
-        });
+			let renderIndex;
+			// Prefer batch-indexed placement when server provides relative index
+			if (typeof data.index === 'number' && currentBatchStartIndex != null) {
+				renderIndex = currentBatchStartIndex + data.index;
+			} else if (ideaToIndexMap.has(data.ideaId)) {
+				renderIndex = ideaToIndexMap.get(data.ideaId);
+			} else {
+				// Fallback: try to find by existing ids
+				const found = currentTitle.thumbnails.findIndex(t => t && (t.id === data.paintingId || t.idea_id === data.ideaId));
+				renderIndex = found !== -1 ? found : currentTitle.thumbnails.length;
+			}
 
-        const totalRelevant = relevantThumbnails.length;
-        console.log(`Status: ${completedCount} completed/failed, ${processingCount} processing, ${pendingCount} pending out of ${totalRelevant}`);
+			// Store mapping for subsequent events
+			if (data.ideaId != null) {
+				ideaToIndexMap.set(data.ideaId, renderIndex);
+			}
 
-        // Update progress UI (example)
-        ai1Status.textContent = 'Thumbnail ideas generated.';
-        ai1Progress.style.width = '100%';
-        // Base progress on completed thumbnails relative to the total number fetched so far for this title
-        // or use expectedQuantity if it's more reliable for the current batch
-        const progressPercentage = totalRelevant > 0 ? (completedCount / totalRelevant) * 100 : 0;
-        ai2Status.textContent = `Generating images... ${completedCount}/${totalRelevant} complete`;
-        ai2Progress.style.width = `${progressPercentage}%`;
+			const base = currentTitle.thumbnails[renderIndex] || { id: data.paintingId, idea_id: data.ideaId };
+			const merged = {
+				...base,
+				id: data.paintingId || base.id,
+				idea_id: data.ideaId || base.idea_id,
+				status: data.status || base.status || 'pending',
+				image_url: data.image_url || base.image_url || '',
+				error_message: data.error_message || base.error_message || ''
+			};
+			currentTitle.thumbnails[renderIndex] = merged;
+			ensureThumbContainer(renderIndex);
+			renderThumbnail(merged, renderIndex);
+		} catch (err) {
+			console.error('Error handling SSE painting event', err);
+		}
+	});
+	
+	sseSource.onerror = (e) => {
+		console.warn('SSE error; UI will rely on manual refresh or polling as fallback.', e);
+	};
+}
 
-        // Check if all *relevant* thumbnails for this title are completed or failed
-        // This check might need refinement if multiple batches can run concurrently
-        if (completedCount === totalRelevant && totalRelevant >= expectedQuantity) {
-            console.log(`[Poll #${attempt + 1}] Condition met. Polling finished.`);
-            progressSection.style.display = 'none';
-            moreThumbnailsSection.style.display = 'block';
-            showLoading(false);
-        } else {
-            console.log(`[Poll #${attempt + 1}] Condition not met (${completedCount}/${totalRelevant} completed). Scheduling next poll.`);
-            // Not finished, poll again after interval
-            setTimeout(() => pollThumbnailStatus(titleId, expectedQuantity, attempt + 1), pollInterval);
-        }
-    } catch (error) {
-        console.error(`[Poll #${attempt + 1}] Error during polling:`, error);
-        // Handle polling error (e.g., show message, maybe stop polling)
-        // If it's a transient network error, could retry a few times before failing
-        if (attempt < maxAttempts - 1) {
-             console.log(`[Poll #${attempt + 1}] Retrying poll after error.`);
-             setTimeout(() => pollThumbnailStatus(titleId, expectedQuantity, attempt + 1), pollInterval); // Retry on error
-        } else {
-             console.error(`[Poll #${attempt + 1}] Max retries reached after error.`);
-             alert('Failed to get thumbnail status updates after multiple attempts. Please check back later.');
-             showLoading(false);
-             // Load whatever is available on final error
-             await loadThumbnails(titleId);
-        }
-    }
+function ensureThumbContainer(index) {
+	const id = `thumb-${index}`;
+	let el = document.getElementById(id);
+	if (!el) {
+		el = document.createElement('div');
+		el.className = 'thumbnail-item';
+		el.id = id;
+		const loadingThumb = document.createElement('div');
+		loadingThumb.className = 'loading-thumbnail';
+		el.appendChild(loadingThumb);
+		thumbnailsGrid.appendChild(el);
+	}
 }
 
 // Initialize when the DOM is loaded

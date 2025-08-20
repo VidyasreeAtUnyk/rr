@@ -18,7 +18,7 @@ const initAPI = async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 10000 // Add timeout to avoid long waits on network issues
+      timeout: 60000 // Increase default timeout to 60s
     });
 
     // Add auth token to requests if available
@@ -44,7 +44,7 @@ const initAPI = async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 10000
+      timeout: 60000
     });
 
     // Add auth token to requests if available
@@ -134,7 +134,8 @@ export const deleteReference = async (id) => {
 // Painting endpoints (renamed from Thumbnail)
 export const generateThumbnails = async (titleId, quantity = 5) => {
   const apiInstance = await ensureAPI();
-  return apiInstance.post('/paintings/generate', { titleId, quantity });
+  // Longer timeout for generation kick-off to avoid client aborts
+  return apiInstance.post('/paintings/generate', { titleId, quantity }, { timeout: 120000 });
 };
 
 export const getThumbnails = async (titleId) => {

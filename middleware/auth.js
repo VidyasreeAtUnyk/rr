@@ -6,11 +6,17 @@ async function authMiddleware(req, res, next) {
   // Get token from header
   const authHeader = req.headers.authorization;
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided' });
+  let token = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query && req.query.token) {
+    // Fallback to query param token (useful for SSE/EventSource which can't set headers)
+    token = req.query.token;
   }
   
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
   
   try {
     // Verify token
