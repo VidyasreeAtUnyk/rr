@@ -496,10 +496,6 @@ function setupEventListeners() {
             // Connect SSE before triggering generation to catch early 'pending' events
             connectSSE(currentTitle.id);
 
-            const stage = document.createElement('div');
-            stage.className = 'thumbnail-status';
-            stage.textContent = 'Creating images...';
-
             const generateResponse = await generatePaintings(currentTitle.id, quantity);
             
             // Live updates via SSE (fallback polling continues)
@@ -1013,12 +1009,12 @@ function renderThumbnail(thumbnailData, index) {
     }
     
     // Show progress stages for pending/processing
-    if (thumbnailData.status === 'pending' || thumbnailData.status === 'processing' || !thumbnailData.image_url) {
+    if (thumbnailData.status === 'pending' || thumbnailData.status === 'processing'|| thumbnailData.status === 'creating prompts...' || thumbnailData.status === 'creating image...' || !thumbnailData.image_url) {
         const loadingThumb = document.createElement('div');
         loadingThumb.className = 'loading-thumbnail';
         const stage = document.createElement('div');
         stage.className = 'thumbnail-status';
-        stage.textContent = thumbnailData.status === 'pending' ? 'Creating image...' : '';
+        stage.textContent = thumbnailData.status || 'Processing...';
         loadingThumb.appendChild(stage);
         thumbContainer.appendChild(loadingThumb);
         return;
@@ -1503,7 +1499,7 @@ function connectSSE(titleId) {
 				...base,
 				id: data.paintingId || base.id,
 				idea_id: data.ideaId || base.idea_id,
-				status: data.status || base.status || 'pending',
+				status: data.status || base.status || 'Processing',
 				image_url: data.image_url || base.image_url || '',
 				error_message: data.error_message || base.error_message || ''
 			};

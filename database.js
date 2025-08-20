@@ -72,7 +72,7 @@ async function initializeDatabase() {
         idea_id INT NOT NULL,
         image_url VARCHAR(255),
         image_data LONGTEXT,
-        status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+        status ENUM('pending', 'processing', 'completed', 'failed', 'Creating prompts...', 'Creating image...') DEFAULT 'pending',
         error_message VARCHAR(255),
         used_reference_ids TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

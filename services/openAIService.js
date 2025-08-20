@@ -60,7 +60,7 @@ async function generateImage(ideaId, prompt, references = []) {
 			'UPDATE paintings SET status = ? WHERE idea_id = ?',
 			statusUpdateParams
 		);
-		await emitStatusForIdea(ideaId, { status: 'processing' });
+		await emitStatusForIdea(ideaId, { status: 'Creating prompts...' });
 		console.log(`Updated status to processing for idea ${ideaId}`);
 
 		let response;

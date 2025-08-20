@@ -90,7 +90,7 @@ async function generatePaintings(req, res) {
 			emitTo(title.user_id, String(titleId), 'painting', {
 				paintingId: insertResult.insertId,
 				ideaId: idea.id,
-				status: 'pending',
+				status: 'Creating image...',
 				summary: idea.summary || '',
 				image_url: '',
 				index: i
