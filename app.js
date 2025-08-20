@@ -190,6 +190,7 @@ let isLoading = true;
 let currentUser = null;
 let sseSource = null;
 let currentBatchStartIndex = null;
+let currentBatchExpected = 0;
 const ideaToIndexMap = new Map();
 
 // DOM Elements
@@ -407,6 +408,35 @@ function logout() {
     showLoginForm();
 }
 
+function showThumbnails(quantity) {
+    const startIndexEarly = thumbnailsGrid.querySelectorAll('.thumbnail-item').length;
+    currentBatchStartIndex = startIndexEarly;
+    currentBatchExpected = quantity;
+    for (let i = 0; i < quantity; i++) {
+        const index = startIndexEarly + i;
+        const thumbContainer = document.createElement('div');
+        thumbContainer.className = 'thumbnail-item';
+        thumbContainer.id = `thumb-${index}`;
+    
+        const loadingThumb = document.createElement('div');
+        loadingThumb.className = 'loading-thumbnail';
+    
+        const stage = document.createElement('div');
+        stage.className = 'thumbnail-status';
+        stage.textContent = 'Creating prompt...';
+    
+        loadingThumb.appendChild(stage);
+        thumbContainer.appendChild(loadingThumb);
+    
+        // Insert at the top instead of appending
+        if (thumbnailsGrid.firstChild) {
+            thumbnailsGrid.insertBefore(thumbContainer, thumbnailsGrid.firstChild);
+        } else {
+            thumbnailsGrid.appendChild(thumbContainer);
+        }
+    }
+}
+
 // Event Listeners
 function setupEventListeners() {
     console.log("Setting up event listeners...");
@@ -424,7 +454,7 @@ function setupEventListeners() {
             alert('Please enter a title');
             return;
         }
-        
+
         showLoading(true);
         
         try {
@@ -434,47 +464,25 @@ function setupEventListeners() {
             // Immediately show placeholders/progress so the user sees activity
             progressSection.style.display = 'block';
             thumbnailsEmptyState.style.display = 'none';
-            const startIndexEarly = thumbnailsGrid.querySelectorAll('.thumbnail-item').length;
-            currentBatchStartIndex = startIndexEarly;
-            currentBatchExpected = quantity;
-            for (let i = 0; i < quantity; i++) {
-                const index = startIndexEarly + i;
-                const thumbContainer = document.createElement('div');
-                thumbContainer.className = 'thumbnail-item';
-                thumbContainer.id = `thumb-${index}`;
-                const loadingThumb = document.createElement('div');
-                loadingThumb.className = 'loading-thumbnail';
-                const stage = document.createElement('div');
-                stage.className = 'thumbnail-status';
-                stage.textContent = 'Creating prompt...';
-                loadingThumb.appendChild(stage);
-                thumbContainer.appendChild(loadingThumb);
-                thumbnailsGrid.appendChild(thumbContainer);
-            }
+            showThumbnails(quantity);
             
             console.log("Creating/updating title:", { title, instructions });
             
             // Check if this is a new title or existing one
             if (!currentTitle || currentTitle.title !== title) {
                 // Create new title
-                console.log("Creating new title");
                 const response = await createTitle(title, instructions);
-                console.log("Title created:", response.data);
                 currentTitle = response.data;
             } else {
                 // Update existing title
-                console.log("Updating existing title:", currentTitle.id);
                 const response = await updateTitle(currentTitle.id, title, instructions);
-                console.log("Title updated:", response.data);
                 currentTitle = response.data;
             }
             
             // Upload any new title-specific references
             if (!globalReferenceToggle.checked && currentTitle.references) {
-                console.log("Processing title-specific references");
                 for (const ref of currentTitle.references) {
                     if (!ref.id) { // New reference that hasn't been uploaded
-                        console.log("Uploading new reference");
                         await uploadReference(currentTitle.id, ref.data, false);
                     }
                 }
@@ -487,14 +495,17 @@ function setupEventListeners() {
             console.log("Generating thumbnails for title ID:", currentTitle.id, "Quantity:", quantity);
             // Connect SSE before triggering generation to catch early 'pending' events
             connectSSE(currentTitle.id);
+
+            const stage = document.createElement('div');
+            stage.className = 'thumbnail-status';
+            stage.textContent = 'Creating images...';
+
             const generateResponse = await generatePaintings(currentTitle.id, quantity);
-            console.log("Generate thumbnails response:", generateResponse.data);
             
             // Live updates via SSE (fallback polling continues)
-            // connectSSE(currentTitle.id);
+            connectSSE(currentTitle.id);
 
             // Refresh titles list after starting generation/polling
-            console.log("Refreshing titles list");
             const titlesResponse = await getTitles();
             titles = titlesResponse.data.titles;
             renderTitlesList();
@@ -533,18 +544,20 @@ function setupEventListeners() {
         
         try {
             const quantity = parseInt(quantitySelect.value) || 3;
-            
+            showThumbnails(quantity);
+            showLoading(false);
             // Generate more thumbnails
             await generatePaintings(currentTitle.id, quantity);
-            
+            connectSSE(currentTitle.id);
             // Get the updated thumbnails
-            await loadThumbnails(currentTitle.id);
+            // await loadThumbnails(currentTitle.id);
+            const titlesResponse = await getTitles();
+            titles = titlesResponse.data.titles;
+            renderTitlesList();
         } catch (error) {
             console.error('Error generating more thumbnails:', error);
             alert('Failed to generate additional thumbnails. Please try again.');
-        } finally {
-            showLoading(false);
-        }
+        } 
     });
     
     // Toggle reference type
@@ -1005,7 +1018,7 @@ function renderThumbnail(thumbnailData, index) {
         loadingThumb.className = 'loading-thumbnail';
         const stage = document.createElement('div');
         stage.className = 'thumbnail-status';
-        stage.textContent = thumbnailData.status === 'pending' ? 'Creating prompt...' : 'Creating image...';
+        stage.textContent = thumbnailData.status === 'pending' ? 'Creating image...' : '';
         loadingThumb.appendChild(stage);
         thumbContainer.appendChild(loadingThumb);
         return;
@@ -1261,14 +1274,14 @@ async function loadTitle(titleItem) {
         connectSSE(currentTitle.id);
 
         // If any painting is pending/processing, we can optionally show progress UI
-        if (currentTitle.thumbnails && currentTitle.thumbnails.some(t => t.status === 'pending' || t.status === 'processing')) {
-            progressSection.style.display = 'block';
-            const total = currentTitle.thumbnails.length;
-            ai1Status.textContent = 'Thumbnail ideas generated.';
-            ai1Progress.style.width = '100%';
-            ai2Status.textContent = `Generating images...`;
-            ai2Progress.style.width = '0%';
-        }
+        // if (currentTitle.thumbnails && currentTitle.thumbnails.some(t => t.status === 'pending' || t.status === 'processing')) {
+        //     progressSection.style.display = 'block';
+        //     const total = currentTitle.thumbnails.length;
+        //     ai1Status.textContent = 'Thumbnail ideas generated.';
+        //     ai1Progress.style.width = '100%';
+        //     ai2Status.textContent = `Generating images...`;
+        //     ai2Progress.style.width = '0%';
+        // }
     } catch (error) {
         console.error('Error loading title:', error);
         alert(`Failed to load title data: ${error.message}. Please try again.`);
