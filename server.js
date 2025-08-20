@@ -31,9 +31,23 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-// Root route
-app.get('/', (req, res) => {
+// Root API route
+/**
+ * Serving JSON at / prevented the SPA from loading its index.html at the site root. 
+ */
+app.get('/api', (req, res) => {
   res.json({ message: 'AI Image Generator API' });
+});
+
+// Serve static frontend
+app.use(express.static(path.join(__dirname)));
+
+// Catch-all to serve index.html for non-API routes
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Initialize database and start server

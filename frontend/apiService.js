@@ -10,7 +10,7 @@ const initAPI = async () => {
     // Use the current origin to get the config (for local development, we might need to adjust this)
     const configResponse = await axios.get('/api/config');
     const { serverIP, apiPort } = configResponse.data;
-    API_URL = `http://${serverIP}:${apiPort}/api`;
+    API_URL = serverIP ? `http://${serverIP}:${apiPort}/api` : '/api';
     
     // Create axios instance with auth token
     api = axios.create({
