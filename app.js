@@ -473,6 +473,8 @@ function setupEventListeners() {
                 // Create new title
                 const response = await createTitle(title, instructions);
                 currentTitle = response.data;
+                titles.unshift(currentTitle);
+                renderTitlesList();
             } else {
                 // Update existing title
                 const response = await updateTitle(currentTitle.id, title, instructions);
